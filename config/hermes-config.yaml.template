@@ -1,0 +1,67 @@
+# =====================================================================
+# HERMES AGENT - CONFIGURAÇÃO T-800 INFRA
+# =====================================================================
+
+model:
+  default: hermes-primary
+  max_tokens: 8192
+  provider: custom
+  base_url: http://localhost:4000/v1
+  api_mode: chat_completions
+  api_key: ${LITELLM_MASTER_KEY}
+  supports_vision: true
+
+providers:
+  lite-llm:
+    api: http://127.0.0.1:4000/v1
+    api_key: ${LITELLM_MASTER_KEY}
+    default_model: hermes-primary
+    name: lite-llm
+
+toolsets:
+  - hermes-cli
+
+agent:
+  max_turns: 150
+  gateway_timeout: 1800
+  tool_use_enforcement: auto
+  task_completion_guidance: true
+  environment_probe: true
+  reasoning_effort: high
+
+terminal:
+  backend: local
+  timeout: 180
+  persistent_shell: true
+  auto_source_bashrc: true
+
+web:
+  backend: duckduckgo
+
+mcp_servers:
+  # Servidor Neo4j GraphRAG (Topologia e SOPs da Infra)
+  neo4j_graphrag:
+    command: python3
+    args:
+      - /opt/hermes-infra/scripts/neo4j_mcp_server.py
+    env:
+      NEO4J_URI: bolt://127.0.0.1:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+
+  # Servidor NetBox (DCIM / IPAM)
+  netbox_mcp:
+    command: uvx
+    args:
+      - netbox-mcp
+    env:
+      NETBOX_URL: ${NETBOX_URL}
+      NETBOX_TOKEN: ${NETBOX_TOKEN}
+
+  # Servidor Cisco IOS-XE / NX-OS (via container ou proxy MCP)
+  ios_xe_mcp:
+    url: http://localhost:8003/mcp
+
+plugins:
+  enabled: []
+  disabled: []

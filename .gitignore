@@ -1,0 +1,27 @@
+# Environment files & Secrets
+.env
+*.env
+*.secret
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Logs & temp files
+*.log
+*.tmp
+*.swp
+
+# Docker data & volumes
+data/
+neo4j_data/
+redis_data/
+hindsight_data/
+logs/
+
+# Wiki downloads (se gerados localmente)
+wiki/
