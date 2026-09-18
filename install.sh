@@ -50,7 +50,7 @@ press_enter() {
 # ---------------------------------------------------------------------
 # ETAPA 1: DIAGNÓSTICO E PRÉ-REQUISITOS DO SISTEMA
 # ---------------------------------------------------------------------
-echo -e "${BLUE}${BOLD}[Etapa 1/6] Verificando Pré-Requisitos do Sistema${NC}"
+echo -e "${BLUE}${BOLD}[Etapa 1/7] Verificando Pré-Requisitos do Sistema${NC}"
 echo -e "Vamos verificar se o seu sistema possui as ferramentas básicas necessárias:\n"
 
 # 1.1 Verificar SO
@@ -99,7 +99,7 @@ press_enter
 # ---------------------------------------------------------------------
 # ETAPA 2: CONFIGURAÇÃO DA FUNDAÇÃO DE IA (LiteLLM + REDIS)
 # ---------------------------------------------------------------------
-echo -e "${BLUE}${BOLD}[Etapa 2/6] Configuração da Fundação de IA (LiteLLM + Redis)${NC}"
+echo -e "${BLUE}${BOLD}[Etapa 2/7] Configuração da Fundação de IA (LiteLLM + Redis)${NC}"
 echo -e "O que é o LiteLLM? Ele funciona como um 'proxy reverso universal' para modelos de IA."
 echo -e "Ele permite que o Hermes se conecte a qualquer provedor (OpenAI, Gemini, Claude, Groq)"
 echo -e "com balanceamento de carga, fallback automático e cache em memória (Redis) para economizar tokens.\n"
@@ -169,7 +169,7 @@ press_enter
 # ---------------------------------------------------------------------
 # ETAPA 3: INSTALAÇÃO E CONFIGURAÇÃO DO HERMES AGENT CLI
 # ---------------------------------------------------------------------
-echo -e "${BLUE}${BOLD}[Etapa 3/6] Instalação do Hermes Agent CLI & Skills de Infra${NC}"
+echo -e "${BLUE}${BOLD}[Etapa 3/7] Instalação do Hermes Agent CLI & Skills de Infra${NC}"
 echo -e "O Hermes Agent é o assistente autônomo que executa diagnósticos, gera comandos"
 echo -e "e interage com sua infraestrutura.\n"
 
@@ -218,7 +218,7 @@ press_enter
 # ---------------------------------------------------------------------
 # ETAPA 4: MÓDULO OPCIONAL - BASE DE CONHECIMENTO (CONFLUENCE + NEO4J)
 # ---------------------------------------------------------------------
-echo -e "${BLUE}${BOLD}[Etapa 4/6] Módulo de Conhecimento (Confluence Sync + Neo4j GraphRAG)${NC}"
+echo -e "${BLUE}${BOLD}[Etapa 4/7] Módulo de Conhecimento (Confluence Sync + Neo4j GraphRAG)${NC}"
 echo -e "Este módulo permite que o T-800 leia a wiki da sua empresa (Confluence),"
 echo -e "converta páginas em Markdown e crie um Grafo de Conhecimento no Neo4j."
 echo -e "Assim, o agente sabe de cor suas topologias, faixas de IP e procedimentos operacionais (SOPs).\n"
@@ -262,7 +262,7 @@ press_enter
 # ---------------------------------------------------------------------
 # ETAPA 5: CONECTORES MCP DE INFRAESTRUTURA (NETBOX, CISCO, ETC)
 # ---------------------------------------------------------------------
-echo -e "${BLUE}${BOLD}[Etapa 5/6] Conectores MCP (Model Context Protocol)${NC}"
+echo -e "${BLUE}${BOLD}[Etapa 5/7] Conectores MCP (Model Context Protocol)${NC}"
 echo -e "O MCP permite ao Hermes se conectar a ferramentas externas de rede como NetBox (IPAM)."
 
 read -p "Você utiliza o NetBox na sua empresa e gostaria de configurá-lo? (s/N): " setup_netbox
@@ -281,9 +281,58 @@ echo ""
 press_enter
 
 # ---------------------------------------------------------------------
-# ETAPA 6: HEALTH CHECK FINAL E PRIMEIROS PASSOS
+
 # ---------------------------------------------------------------------
-echo -e "${BLUE}${BOLD}[Etapa 6/6] Validação Final do Ambiente${NC}\n"
+# ETAPA 6: MÓDULO OPCIONAL - ENRIQUECIMENTO DE ALERTAS (ZABBIX + NETBOX + IA)
+# ---------------------------------------------------------------------
+echo -e "[Etapa 6/7] Módulo: Enriquecimento Inteligente de Alertas (Alert Enricher)"
+echo -e "O que é o Alert Enricher?"
+echo -e "É um microsserviço que recebe webhooks de alertas do Zabbix ou Prometheus,"
+echo -e "cruza dados no NetBox para descobrir fabricante, site, modelo e vizinhos BGP,"
+echo -e "passa pelo LiteLLM/Hermes para gerar a causa-raiz e comandos CLI de validação,"
+echo -e "e posta o diagnóstico completo em uma thread no Slack ou Telegram.
+"
+
+read -p "Deseja importar e configurar o Alert Enricher agora? (s/N): " setup_enricher
+if [[ "" =~ ^[sS]$ ]]; then
+    sudo mkdir -p "/modules/alert-enricher"
+    cp -r "/modules/alert-enricher/"* "/modules/alert-enricher/"
+    ENRICHER_ENV="/modules/alert-enricher/config/enricher.env"
+    if [ ! -f "" ]; then
+        cp "/modules/alert-enricher/config/enricher.env.example" ""
+    fi
+    sed -i "s|sk-hermes-infra-master-key-change-me||" ""
+    if [ -n "" ]; then sed -i "s|^NETBOX_URL=.*|NETBOX_URL=|" ""; fi
+    if [ -n "" ]; then sed -i "s|^NETBOX_TOKEN=.*|NETBOX_TOKEN=|" ""; fi
+
+    echo -e "
+Notificações do Alerta:"
+    read -p "Possui Bot Token do Slack (xoxb-...)? (Pressione Enter para pular): " slack_token
+    if [ -n "" ]; then
+        read -p "ID do Canal no Slack (ex: C0123456789): " slack_chan
+        sed -i "s|^SLACK_BOT_TOKEN=.*|SLACK_BOT_TOKEN=|" ""
+        sed -i "s|^SLACK_CHANNEL_ID=.*|SLACK_CHANNEL_ID=|" ""
+    fi
+
+    echo -e "
+Deseja subir o container do Alert Enricher na porta 8080? (s/N): "
+    read -r start_enricher_container
+    if [[ "" =~ ^[sS]$ ]]; then
+        cd "/modules/alert-enricher"
+        docker compose -f docker-compose.enricher.yml up -d --build
+        echo -e "✓ Alert Enricher rodando em http://localhost:8080/enrich-alert!"
+    fi
+else
+    echo -e "Alert Enricher não iniciado. Os scripts e guias estão disponíveis em modules/alert-enricher/."
+fi
+
+echo ""
+press_enter
+
+# ---------------------------------------------------------------------
+# ETAPA 7: HEALTH CHECK FINAL E PRIMEIROS PASSOS
+# ---------------------------------------------------------------------
+echo -e "${BLUE}${BOLD}[Etapa 7/7] Validação Final do Ambiente${NC}\n"
 
 bash "$SCRIPT_DIR/scripts/check_health.sh"
 

@@ -1,0 +1,17 @@
+[Unit]
+Description=Hermes Alert Enricher Microservice
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=hermes
+WorkingDirectory=/opt/hermes-infra/modules/alert-enricher
+EnvironmentFile=/opt/hermes-infra/modules/alert-enricher/config/enricher.env
+ExecStart=/usr/bin/python3 -m uvicorn src.main:app --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

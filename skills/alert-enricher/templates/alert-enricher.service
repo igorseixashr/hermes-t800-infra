@@ -1,0 +1,21 @@
+[Unit]
+Description=Alert Enricher FastAPI Service
+After=network.target
+
+[Service]
+User=hermes
+Group=hermes
+WorkingDirectory=/opt/alert-enricher
+Environment=PATH=/opt/alert-enricher/venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=SLACK_BOT_TOKEN={{slack_bot_token}}
+Environment=SLACK_CHANNEL_ID={{slack_channel_id}}
+Environment=NETBOX_URL={{netbox_url}}
+Environment=NETBOX_TOKEN={{netbox_token}}
+Environment=LLM_URL=http://localhost:4000/v1/chat/completions
+Environment=LLM_MODEL=qwen-coder
+Environment=MCP_URL=http://localhost:8001
+ExecStart=/opt/alert-enricher/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8080
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

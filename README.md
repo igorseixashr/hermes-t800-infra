@@ -89,6 +89,16 @@ Habilidades especializadas que ensinam o agente a operar equipamentos e protocol
 
 ---
 
+
+### 4. Microsserviço Alert Enricher ()
+* **Captura Inteligente:** Endpoint webhook () compatível com Zabbix, Prometheus e Alertmanager.
+* **Cruzamento com NetBox:** Descobre site, fabricante, modelo, IP primário e vizinhos BGP do host em alerta.
+* **Triagem com IA:** Gera automaticamente a causa raiz provável, impacto operacional e os comandos CLI exatos para o operador executar no switch, roteador ou firewall.
+* **Entrega no Slack/Telegram:** Notifica a equipe com o chamado pronto e estruturado.
+* **Anti-Flap:** Deduplicação inteligente de alertas para evitar tempestades no chat.
+
+---
+
 ## 💡 Como Usar no Dia a Dia
 
 Após a instalação, abra seu terminal e digite:
